@@ -1,0 +1,4 @@
+opencv-python==4.7.0.72
+opencv-python-headless==4.7.0.72
+faiss-cpu==1.7.4
+transformers==4.29.2

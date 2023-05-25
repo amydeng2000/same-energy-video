@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Hover Video Playback</title>
+    <style>
+      .video-container {
+        position: relative;
+        display: inline-block;
+        width: 25%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .video-container img {
+        width: 100%;
+        height: auto;
+      }
+
+      .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .video-container:hover video {
+        opacity: 1;
+      }
+
+      .video-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var videoContainers =
+          document.getElementsByClassName("video-container");
+
+        for (var i = 0; i < videoContainers.length; i++) {
+          var video = videoContainers[i].querySelector("video");
+          var startSeconds = 5; // Specify the starting time in seconds
+
+          videoContainers[i].addEventListener("mouseover", function () {
+            var video = this.querySelector("video");
+            video.currentTime = startSeconds;
+            video.play();
+          });
+
+          videoContainers[i].addEventListener("mouseout", function () {
+            var video = this.querySelector("video");
+            video.pause();
+            video.currentTime = startSeconds;
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="video-grid">
+      {% for screenshot in screenshots %}
+      <div class="video-container">
+        <img
+          src="{{ url_for('send_screenshot', path=screenshot) }}"
+          alt="Image 1"
+        />
+        <video src="./example_video.webm" preload="metadata"></video>
+      </div>
+      {% endfor %}
+      <!-- Add more video-container divs for additional images and videos -->
+    </div>
+  </body>
+</html>
