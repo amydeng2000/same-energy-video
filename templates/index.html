@@ -43,19 +43,43 @@
   </head>
   <body>
     <div class="video-grid">
-      {% for i in range(screenshots|length) %}
-      <div class="video-container">
-        <img
-          src="{{ url_for('send_screenshot', path=screenshots[i]) }}"
-          alt="Image 1"
-        />
+      {% for path in screenshot_paths %}
+      <div
+        class="video-container"
+        onclick="generateNewScreenshotPaths('{{ path }}')"
+      >
+        <img src="{{ url_for('send_screenshot', path=path) }}" alt="Image 1" />
         <video
           src="{{ url_for('send_video') }}"
           preload="none"
-          poster="{{ url_for('send_screenshot', path=screenshots[i]) }}"
+          poster="{{ url_for('send_screenshot', path=path) }}"
         ></video>
       </div>
       {% endfor %}
     </div>
+    <script>
+      function generateNewScreenshotPaths(path) {
+        // Make an AJAX request to the backend to fetch new screenshot_paths
+        fetch("/resort_screenshots", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ path: path }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Update the screenshot_paths in the frontend
+            const screenshotPaths = data.screenshot_paths;
+            const imageElements = document.querySelectorAll(".video-grid img");
+            screenshotPaths.forEach((screenshotPath, index) => {
+              imageElements[index].src = screenshotPath;
+            });
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
   </body>
 </html>
