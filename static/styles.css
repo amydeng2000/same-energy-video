@@ -1,0 +1,32 @@
+.video-container {
+  position: relative;
+  display: inline-block;
+  width: 25%;
+  padding: 10px;
+  box-sizing: border-box;
+  }
+
+.video-container img {
+  width: 100%;
+  height: auto;
+}
+
+.video-container video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-container:hover video {
+  opacity: 1;
+}
+
+.video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}

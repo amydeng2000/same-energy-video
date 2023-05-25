@@ -1,60 +1,41 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Image Hover Video Playback</title>
-    <style>
-      .video-container {
-        position: relative;
-        display: inline-block;
-        width: 25%;
-        padding: 10px;
-        box-sizing: border-box;
-      }
-
-      .video-container img {
-        width: 100%;
-        height: auto;
-      }
-
-      .video-container video {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .video-container:hover video {
-        opacity: 1;
-      }
-
-      .video-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <title>Same Energy Video</title>
     <script>
+      function extractNumberFromPath(path) {
+        var regex = /(\d+)(?!.*\d)/;
+        var match = path.match(regex);
+        if (match && match.length > 0) {
+          return parseInt(match[0]);
+        }
+        return 0; // Default value if no number found
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         var videoContainers =
           document.getElementsByClassName("video-container");
 
         for (var i = 0; i < videoContainers.length; i++) {
           var video = videoContainers[i].querySelector("video");
-          var startSeconds = 5; // Specify the starting time in seconds
 
           videoContainers[i].addEventListener("mouseover", function () {
             var video = this.querySelector("video");
-            video.currentTime = startSeconds;
+            var screenshotPath = this.querySelector("img").getAttribute("src");
+            var screenshotNumber = extractNumberFromPath(screenshotPath);
+            var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
+
+            video.currentTime = dynamicStartSeconds;
             video.play();
           });
 
           videoContainers[i].addEventListener("mouseout", function () {
             var video = this.querySelector("video");
             video.pause();
-            video.currentTime = startSeconds;
           });
         }
       });
@@ -68,7 +49,11 @@
           src="{{ url_for('send_screenshot', path=screenshots[i]) }}"
           alt="Image 1"
         />
-        <video src="{{ url_for('send_video') }}" preload="metadata"></video>
+        <video
+          src="{{ url_for('send_video') }}"
+          preload="none"
+          poster="{{ url_for('send_screenshot', path=screenshots[i]) }}"
+        ></video>
       </div>
       {% endfor %}
     </div>
