@@ -43,22 +43,24 @@
   </head>
   <body>
     <div class="video-grid">
-      {% for path in screenshot_paths %}
-      <div
-        class="video-container"
-        onclick="generateNewScreenshotPaths('{{ path }}')"
-      >
-        <img src="{{ url_for('send_screenshot', path=path) }}" alt="Image 1" />
+      {% for screenshot_path in screenshot_paths %}
+      <div class="video-container" onclick="generateNewScreenshotPaths(this)">
+        <img
+          src="{{ url_for('send_screenshot', path=screenshot_path) }}"
+          alt="Image 1"
+        />
         <video
           src="{{ url_for('send_video') }}"
           preload="none"
-          poster="{{ url_for('send_screenshot', path=path) }}"
+          poster="{{ url_for('send_screenshot', path=screenshot_path) }}"
         ></video>
       </div>
       {% endfor %}
     </div>
     <script>
-      function generateNewScreenshotPaths(path) {
+      function generateNewScreenshotPaths(element) {
+        var path = element.querySelector("img").getAttribute("src");
+        console.log("[DEBUG] path: " + path);
         // Make an AJAX request to the backend to fetch new screenshot_paths
         fetch("/resort_screenshots", {
           method: "POST",
@@ -74,6 +76,11 @@
             const imageElements = document.querySelectorAll(".video-grid img");
             screenshotPaths.forEach((screenshotPath, index) => {
               imageElements[index].src = screenshotPath;
+              // Update the poster of the video
+              const videoContainer =
+                imageElements[index].closest(".video-container");
+              const video = videoContainer.querySelector("video");
+              video.poster = screenshotPath;
             });
           })
           .catch((error) => {

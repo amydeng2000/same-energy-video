@@ -1,6 +1,6 @@
 import os
 import cv2
-from flask import Flask, render_template, send_from_directory, request, jsonify
+from flask import Flask, render_template, send_from_directory, request, jsonify, redirect
 import fnmatch
 import os
 from random import random
@@ -72,13 +72,10 @@ def send_video():
 @app.route('/resort_screenshots', methods=['POST'])
 def resort_screenshots():
     screenshot_path = request.json['path']
-    screenshot_path = 'screenshots/' + screenshot_path
+    screenshot_path = screenshot_path.strip("/")   # FIXME
     # absolute_path = relative_path + screenshot_path
     screenshot_embedding = get_embedding(screenshot_path)
     new_screenshot_paths = similarity_search(screenshot_embedding, len(screenshot_paths))
-    
-    print(f'*************************** [DEBUG] new_screenshot_paths: {new_screenshot_paths}')
-
     return jsonify(screenshot_paths=new_screenshot_paths)
 
 # Retrieve the embedding for a given screenshot_path
