@@ -11,17 +11,17 @@
   height: auto;
 }
 
-.video-container video {
+.video-container iframe {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.video-container:hover video {
+.video-container:hover iframe {
   opacity: 1;
 }
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="https://www.youtube.com/player_api"></script>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
@@ -16,29 +17,85 @@
         return 0; // Default value if no number found
       }
 
-      document.addEventListener("DOMContentLoaded", function () {
+      // YouTube Player API callback function
+      function onYouTubeIframeAPIReady() {
         var videoContainers =
           document.getElementsByClassName("video-container");
 
         for (var i = 0; i < videoContainers.length; i++) {
-          var video = videoContainers[i].querySelector("video");
+          var videoContainer = videoContainers[i];
+          var screenshotPath = videoContainer
+            .querySelector("img")
+            .getAttribute("src");
+          var screenshotNumber = extractNumberFromPath(screenshotPath);
+          var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
 
-          videoContainers[i].addEventListener("mouseover", function () {
-            var video = this.querySelector("video");
-            var screenshotPath = this.querySelector("img").getAttribute("src");
-            var screenshotNumber = extractNumberFromPath(screenshotPath);
-            var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
+          var player = createYouTubePlayer(videoContainer, dynamicStartSeconds);
 
-            video.currentTime = dynamicStartSeconds;
-            video.play();
+          videoContainer.addEventListener("mouseover", function () {
+            var iframe = getPlayerFromContainer(this);
+            if (iframe) {
+              iframe.contentWindow.postMessage(
+                '{"event":"command","func":"playVideo","args":""}',
+                "*"
+              );
+            }
           });
 
-          videoContainers[i].addEventListener("mouseout", function () {
-            var video = this.querySelector("video");
-            video.pause();
+          videoContainer.addEventListener("mouseout", function () {
+            var iframe = getPlayerFromContainer(this);
+            if (iframe) {
+              iframe.contentWindow.postMessage(
+                '{"event":"command","func":"pauseVideo","args":""}',
+                "*"
+              );
+            }
           });
         }
-      });
+      }
+
+      // Create a YouTube player in the specified container and set the start time
+      function createYouTubePlayer(container, startSeconds) {
+        var playerDiv = document.createElement("div");
+        container.insertBefore(playerDiv, container.firstChild);
+
+        return new YT.Player(playerDiv, {
+          height: "100%",
+          width: "100%",
+          videoId: "2yyxt8PpO84",
+          playerVars: {
+            playsinline: 1,
+            controls: 2, // FIXME: supposedly this improves render speed?
+            start: startSeconds,
+          },
+          //   events: {
+          //     onReady: onPlayerReady,
+          //   },
+        });
+      }
+
+      // Get the YouTube player instance associated with the given container
+      function getPlayerFromContainer(container) {
+        var iframeElement = container.querySelector("iframe");
+        if (iframeElement && iframeElement.tagName === "IFRAME") {
+          return iframeElement;
+        }
+        return null;
+      }
+
+      // The API calls this function when the player is ready
+      function onPlayerReady(event) {
+        // Uncomment the following line if you want the video to start playing automatically
+        // event.target.playVideo();
+      }
+
+      // Load the YouTube Player API script asynchronously
+      (function () {
+        var tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName("script")[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })();
     </script>
   </head>
   <body>
@@ -49,11 +106,10 @@
           src="{{ url_for('send_screenshot', path=screenshot_path) }}"
           alt="Image 1"
         />
-        <video
-          src="{{ url_for('send_video') }}"
-          preload="none"
+        <div
+          id="player"
           poster="{{ url_for('send_screenshot', path=screenshot_path) }}"
-        ></video>
+        ></div>
       </div>
       {% endfor %}
     </div>
