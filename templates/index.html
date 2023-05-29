@@ -138,11 +138,28 @@
           .then((data) => {
             // Update the screenshot_paths in the frontend
             const screenshotPaths = data.screenshot_paths;
-            const imageElements = document.querySelectorAll(
-              ".video-container img"
-            );
+            const videoContainers =
+              document.querySelectorAll(".video-container");
             screenshotPaths.forEach((screenshotPath, index) => {
-              imageElements[index].src = screenshotPath;
+              const container = videoContainers[index];
+              const imgElement = container.querySelector("img");
+              const iframeElement = container.querySelector("iframe");
+
+              // Remove the old YouTube player
+              if (iframeElement && iframeElement.tagName === "IFRAME") {
+                const player = YT.get(iframeElement.id);
+                if (player) {
+                  player.destroy();
+                }
+              }
+
+              // Update the image source
+              imgElement.src = screenshotPath;
+
+              // Create a new YouTube player with the new videoId
+              var screenshotNumber = extractNumberFromPath(screenshotPath);
+              var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
+              createYouTubePlayer(container, dynamicStartSeconds);
             });
           })
           .catch((error) => {
