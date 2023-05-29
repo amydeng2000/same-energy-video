@@ -33,6 +33,11 @@
           var player = createYouTubePlayer(videoContainer, dynamicStartSeconds);
 
           videoContainer.addEventListener("mouseover", function () {
+            var overlay = this.querySelector(".overlay");
+            if (overlay) {
+              overlay.style.display = "block";
+            }
+
             var iframe = getPlayerFromContainer(this);
             if (iframe) {
               iframe.contentWindow.postMessage(
@@ -43,6 +48,11 @@
           });
 
           videoContainer.addEventListener("mouseout", function () {
+            var overlay = this.querySelector(".overlay");
+            if (overlay) {
+              overlay.style.display = "none";
+            }
+
             var iframe = getPlayerFromContainer(this);
             if (iframe) {
               iframe.contentWindow.postMessage(
@@ -107,8 +117,8 @@
           alt="Image 1"
         />
         <div
-          id="player"
-          poster="{{ url_for('send_screenshot', path=screenshot_path) }}"
+          class="overlay"
+          onclick="generateNewScreenshotPaths(this.parentElement)"
         ></div>
       </div>
       {% endfor %}
@@ -116,7 +126,6 @@
     <script>
       function generateNewScreenshotPaths(element) {
         var path = element.querySelector("img").getAttribute("src");
-        console.log("[DEBUG] path: " + path);
         // Make an AJAX request to the backend to fetch new screenshot_paths
         fetch("/resort_screenshots", {
           method: "POST",
@@ -129,14 +138,11 @@
           .then((data) => {
             // Update the screenshot_paths in the frontend
             const screenshotPaths = data.screenshot_paths;
-            const imageElements = document.querySelectorAll(".video-grid img");
+            const imageElements = document.querySelectorAll(
+              ".video-container img"
+            );
             screenshotPaths.forEach((screenshotPath, index) => {
               imageElements[index].src = screenshotPath;
-              // Update the poster of the video
-              const videoContainer =
-                imageElements[index].closest(".video-container");
-              const video = videoContainer.querySelector("video");
-              video.poster = screenshotPath;
             });
           })
           .catch((error) => {
