@@ -66,8 +66,8 @@
 
       // Create a YouTube player in the specified container and set the start time
       function createYouTubePlayer(container, startSeconds) {
-        var playerDiv = document.createElement("div");
-        container.insertBefore(playerDiv, container.firstChild);
+        var playerDiv = container.querySelector(".player-div");
+        var imgElement = container.querySelector("img");
 
         return new YT.Player(playerDiv, {
           height: "100%",
@@ -78,9 +78,22 @@
             controls: 2, // FIXME: supposedly this improves render speed?
             start: startSeconds,
           },
-          //   events: {
-          //     onReady: onPlayerReady,
-          //   },
+          events: {
+            onStateChange: function (event) {
+              var iframe = container.querySelector("iframe");
+              if (!iframe) return;
+              if (event.data == YT.PlayerState.PLAYING) {
+                // imgElement.style.display = "none";
+                iframe.classList.add("iframe-playing");
+              } else if (
+                event.data == YT.PlayerState.ENDED ||
+                event.data == YT.PlayerState.PAUSED
+              ) {
+                imgElement.style.display = "block";
+                iframe.classList.remove("iframe-playing");
+              }
+            },
+          },
         });
       }
 
@@ -116,6 +129,7 @@
           src="{{ url_for('send_screenshot', path=screenshot_path) }}"
           alt="Image 1"
         />
+        <div class="player-div"></div>
         <div
           class="overlay"
           onclick="generateNewScreenshotPaths(this.parentElement)"
@@ -141,25 +155,27 @@
             const videoContainers =
               document.querySelectorAll(".video-container");
             screenshotPaths.forEach((screenshotPath, index) => {
-              const container = videoContainers[index];
-              const imgElement = container.querySelector("img");
-              const iframeElement = container.querySelector("iframe");
-
-              // Remove the old YouTube player
-              if (iframeElement && iframeElement.tagName === "IFRAME") {
-                const player = YT.get(iframeElement.id);
-                if (player) {
-                  player.destroy();
-                }
-              }
-
               // Update the image source
               imgElement.src = screenshotPath;
 
               // Create a new YouTube player with the new videoId
               var screenshotNumber = extractNumberFromPath(screenshotPath);
               var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
-              createYouTubePlayer(container, dynamicStartSeconds);
+              var playerDiv = container.querySelector(".player-div");
+
+              // Get existing YouTube player
+              var player = YT.get(playerDiv.id);
+              if (player) {
+                // Update the video ID and start time
+                player.cueVideoById({
+                  videoId: "2yyxt8PpO84", // Replace with your actual videoId
+                  startSeconds: dynamicStartSeconds,
+                });
+              } else {
+                // If no player found, create a new one
+                console.log("created a new player");
+                createYouTubePlayer(container, dynamicStartSeconds);
+              }
             });
           })
           .catch((error) => {
