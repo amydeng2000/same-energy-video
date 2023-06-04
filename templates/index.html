@@ -9,70 +9,81 @@
     <title>Same Energy Video</title>
     <script>
       function extractNumberFromPath(path) {
-        var regex = /(\d+)(?!.*\d)/;
-        var match = path.match(regex);
-        if (match && match.length > 0) {
-          return parseInt(match[0]);
+        // var regex = /(\d+)(?!.*\d)/;
+        // var match = path.match(regex);
+        // if (match && match.length > 0) {
+        //   return parseInt(match[0]);
+        // }
+        return 0; // Default value if no number found
+      }
+
+      function getStartSecondsFromImagePath(imagePath) {
+        console.log("[DEBUG] imagePath = " + imagePath);
+        var regex = /_(\d+\.\d+)_/;
+        var match = imagePath.match(regex);
+        console.log("[DEBUG] match = " + match);
+        if (match && match.length > 1) {
+          return parseFloat(match[1]);
         }
         return 0; // Default value if no number found
       }
 
-      // YouTube Player API callback function
-      function onYouTubeIframeAPIReady() {
-        var videoContainers =
-          document.getElementsByClassName("video-container");
-
-        for (var i = 0; i < videoContainers.length; i++) {
-          var videoContainer = videoContainers[i];
-          var screenshotPath = videoContainer
-            .querySelector("img")
-            .getAttribute("src");
-          var screenshotNumber = extractNumberFromPath(screenshotPath);
-          var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
-
-          var player = createYouTubePlayer(videoContainer, dynamicStartSeconds);
-
-          videoContainer.addEventListener("mouseover", function () {
-            var overlay = this.querySelector(".overlay");
-            if (overlay) {
-              overlay.style.display = "block";
-            }
-
-            var iframe = getPlayerFromContainer(this);
-            if (iframe) {
-              iframe.contentWindow.postMessage(
-                '{"event":"command","func":"playVideo","args":""}',
-                "*"
-              );
-            }
-          });
-
-          videoContainer.addEventListener("mouseout", function () {
-            var overlay = this.querySelector(".overlay");
-            if (overlay) {
-              overlay.style.display = "none";
-            }
-
-            var iframe = getPlayerFromContainer(this);
-            if (iframe) {
-              iframe.contentWindow.postMessage(
-                '{"event":"command","func":"pauseVideo","args":""}',
-                "*"
-              );
-            }
-          });
+      function getVideoIdFromImagePath(imagePath) {
+        var regex = /\/([^_\/]*)_/;
+        var match = imagePath.match(regex);
+        if (match && match.length > 1) {
+          return match[1];
         }
+        return null; // Default value if no match found
+      }
+
+      function onYouTubeIframeAPIReady(videoContainer) {
+        var screenshotPath = videoContainer
+          .querySelector("img")
+          .getAttribute("src");
+        console.log("[DEBUG]: " + screenshotPath);
+        var dynamicStartSeconds = getStartSecondsFromImagePath(screenshotPath);
+        var videoId = getVideoIdFromImagePath(screenshotPath);
+        var player = createYouTubePlayer(
+          videoContainer,
+          videoId,
+          dynamicStartSeconds
+        );
+
+        videoContainer.addEventListener("mouseover", function () {
+          var overlay = this.querySelector(".overlay");
+          if (overlay) {
+            overlay.style.display = "block";
+          }
+
+          var iframe = getPlayerFromContainer(this);
+          if (iframe) {
+            player.playVideo();
+          }
+        });
+
+        videoContainer.addEventListener("mouseout", function () {
+          var overlay = this.querySelector(".overlay");
+          if (overlay) {
+            overlay.style.display = "none";
+          }
+
+          var iframe = getPlayerFromContainer(this);
+          if (iframe) {
+            player.pauseVideo();
+          }
+        });
       }
 
       // Create a YouTube player in the specified container and set the start time
-      function createYouTubePlayer(container, startSeconds) {
+      function createYouTubePlayer(container, videoId, startSeconds) {
         var playerDiv = container.querySelector(".player-div");
         var imgElement = container.querySelector("img");
 
         return new YT.Player(playerDiv, {
           height: "100%",
           width: "100%",
-          videoId: "2yyxt8PpO84",
+          videoId: videoId,
           playerVars: {
             playsinline: 1,
             controls: 2, // FIXME: supposedly this improves render speed?
@@ -119,11 +130,90 @@
         var firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
       })();
+
+      document.addEventListener("DOMContentLoaded", function () {
+        let nextPageToken = null;
+        let videoGrid = document.querySelector(".video-grid");
+
+        function createImageElement(url) {
+          let div = document.createElement("div");
+          div.classList.add("video-container");
+
+          let img = document.createElement("img");
+          img.classList.add("lazy");
+          img.dataset.src = url;
+          img.src = "placeholder.jpg";
+          img.alt = "Image 1";
+
+          let playerDiv = document.createElement("div");
+          playerDiv.classList.add("player-div");
+
+          let overlayDiv = document.createElement("div");
+          overlayDiv.classList.add("overlay");
+
+          div.appendChild(img);
+          div.appendChild(playerDiv);
+          div.appendChild(overlayDiv);
+
+          return div;
+        }
+
+        function fetchNextPage() {
+          let url = nextPageToken
+            ? "/screenshots/next/" + nextPageToken
+            : "/screenshots/";
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              nextPageToken = data.next_token;
+              data.screenshot_urls.forEach((url) => {
+                var newImageElement = createImageElement(url);
+                videoGrid.appendChild(newImageElement);
+              });
+              lazyLoadImages();
+            })
+            .catch((error) => console.error("Error:", error));
+        }
+
+        function lazyLoadImages() {
+          let lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+          if ("IntersectionObserver" in window) {
+            let lazyImageObserver = new IntersectionObserver(function (
+              entries,
+              observer
+            ) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  let lazyImage = entry.target;
+                  lazyImage.src = lazyImage.dataset.src;
+                  lazyImage.classList.remove("lazy");
+                  lazyImageObserver.unobserve(lazyImage);
+
+                  // If the last image came into view, fetch the next page
+                  if (lazyImage === lazyImages[lazyImages.length - 1]) {
+                    fetchNextPage();
+                  }
+
+                  // Call onYouTubeIframeAPIReady after img src is updated
+                  let videoContainer = lazyImage.parentElement;
+                  onYouTubeIframeAPIReady(videoContainer);
+                }
+              });
+            });
+
+            lazyImages.forEach(function (lazyImage) {
+              lazyImageObserver.observe(lazyImage);
+            });
+          }
+        }
+
+        fetchNextPage();
+      });
     </script>
   </head>
   <body>
     <div class="video-grid">
-      {% for screenshot_path in screenshot_paths %}
+      <!-- {% for screenshot_path in screenshot_paths %}
       <div class="video-container" onclick="generateNewScreenshotPaths(this)">
         <img
           src="{{ url_for('send_screenshot', path=screenshot_path) }}"
@@ -135,18 +225,18 @@
           onclick="generateNewScreenshotPaths(this.parentElement)"
         ></div>
       </div>
-      {% endfor %}
+      {% endfor %} -->
     </div>
     <script>
       function generateNewScreenshotPaths(element) {
-        var path = element.querySelector("img").getAttribute("src");
+        var screenshot_path = element.querySelector("img").getAttribute("src");
         // Make an AJAX request to the backend to fetch new screenshot_paths
         fetch("/resort_screenshots", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ path: path }),
+          body: JSON.stringify({ path: screenshot_path }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -159,8 +249,9 @@
               imgElement.src = screenshotPath;
 
               // Create a new YouTube player with the new videoId
-              var screenshotNumber = extractNumberFromPath(screenshotPath);
-              var dynamicStartSeconds = (screenshotNumber + 1) * 5; // FIXME: time interval is hardcoded
+              var videoId = getVideoIdFromImagePath(screenshotPath);
+              var dynamicStartSeconds =
+                getStartSecondsFromImagePath(screenshotPath);
               var playerDiv = container.querySelector(".player-div");
 
               // Get existing YouTube player
@@ -168,7 +259,7 @@
               if (player) {
                 // Update the video ID and start time
                 player.cueVideoById({
-                  videoId: "2yyxt8PpO84", // Replace with your actual videoId
+                  videoId: videoId, // Replace with your actual videoId
                   startSeconds: dynamicStartSeconds,
                 });
               } else {

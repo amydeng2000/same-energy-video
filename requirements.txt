@@ -3,3 +3,4 @@ opencv-python-headless==4.7.0.72
 faiss-cpu==1.7.4
 transformers==4.29.2
 Pillow==8.4.0
+google-cloud-storage==2.9.0

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "same-energy-video",
+  "private_key_id": "052fb778033313ea2454d44c6b55b8011e9471a0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCYnjVrra3rZ/eQ\nhNTdzWK/LABwTKCmNFsYMyTKNltp3obA30hq2B1aPNYc8vP4dcodrGIaH0XlenCT\nMcILts7P9HD+96dmTlf/MUT+WdAf7tBGboPtTgnJLBmgZ8RN8Te71K5z9RoF4B5M\neJH0UK2eajCaW8XtHARDeoFOIRF2LfuzgKzJaJ8SLFScCZShgRhHvTp0Up+SrAGe\nLYBRBPW6OzNg1VmVJazR2fAXY4+3f/KH4mGsQ8HXZ/uo8m5w40VSfi7jA7EAYocu\nPwQSzjk8N+FvXn5K1U+DmHSAjBWX/1khbW/zTk/TB7xK7Ocw81ORHZgTXT0Zs3i4\ncJeUONg7AgMBAAECggEAAYLUAZmw0ngBTuvrm1CjD9txDn2igLw0RsqmvM2y0bIW\nR+BuEYiKI+j9xry6S7RwffUUJ3k8aH3N5wWLJiRJKXNeLOJV6P2N5EGz2vebCWf0\nDtL5mhTBg4jz4nai6J7AKxRG6weBweNkLLADEe6YTZJNBOQSmB1sE75XovCzpT/v\nYex4N0iZ+QV5+ifqjBgZ8K7etswxYY26U0zOcrOfHfsqEZ1bPbR9rDF1+bY8XRzI\n7I7AdI1lWQiu6OOcEN1FfEE2N8Xip0S32FwUoZtk5Jh0HIrHuWrjtfrTq9GQiNG4\nilWsjxI0W4RMXi2HQ3kCy5ZYnk9kQ0emiTLxCxN5MQKBgQDQJTqMKcmfZZZIioXR\nYe2N66Q3txNnMmE0O5l00A1ZpsSspNemtKS9HEEEPAu6LOHxYJObi5gAZvTIw7xz\nP1dAgJLhKCtWJwu3yQKc1RTlFQdQt9/KvOPm+kLVN9Igm67B0W07yMZNw/BCxMyT\n3UXBlJmZEtQZSCa0BynjbTHyZwKBgQC7tNBxALzU1EbZIHKhuCC6gbvlfjWUbqUB\nYaA+R1vFSMPvkxXczfSGzDcNM9EY6MpwysV7cPieBmE22Pe74bAyq97LsUE2ezks\n7eTz1m2Av9FBRrETdXE3T+e8ggrt387PdKNO9pjdTjiPRJgZT2bftKUi8FiJztUc\naJXMLniPDQKBgA9MfTYqKCCoJdilHdra+MvyovpZYXq3UD+3lbrpQ+HwCQqrfxJI\nuscPmZPHGhGQFPdZ4t+O7hgxeRJ8mJBb+nzKNoGII09MxWa3xpJicwu3dPcw3KkZ\nIyMqB9mGJdKxvrGORBod0r2KhlFSB7tiiysEUhnXMXG+ROH8mM6XixFHAoGAEbtY\nAYTPUc+nzbUZ/xr0xImi5WAR0a7OGZ5OU/PLwIxKLiSX6R7vnZhHDxE5DIBZN2SA\nWVPnuI3juxmt9WqxiWfhCR76iRoE4bCrczlraME2FFOIQM1UX6RFwPIL9EKzN7fO\nAZScBjPwdeBF+gYdMr7O5skLpCEM0r0ygXJWYzUCgYBmwPDbsnw7YWtC01x1Wc3z\nAU15BPkahw/k1Izq4nSGcxkkrCwXtxhXx9/obbxXnTnm9A10dnyxKpcbS9uAwCtO\nxmHXnTLZEIojCPZ0lXwGxrVWkilb+Pj4yxlh6vONWiU4lOqvkO/+T8SpGReO5zVD\nMzeqVV2i5m1r1xoginVYXg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "dev-495@same-energy-video.iam.gserviceaccount.com",
+  "client_id": "111483564603590842117",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dev-495%40same-energy-video.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
